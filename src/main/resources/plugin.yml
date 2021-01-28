@@ -1,0 +1,12 @@
+name: Bounties
+version: ${project.version}
+main: me.marshall.bounties.Bounties
+api-version: 1.13
+softdepend: [Vault]
+authors: [Marshall]
+description: A bounty plugin
+website: https://www.gitlab.com.Marshall
+commands:
+  bounty:
+    description: Main bounty command
+    permission: bounty.add
