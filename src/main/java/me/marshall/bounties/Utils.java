@@ -18,26 +18,26 @@ import java.util.UUID;
 
 public class Utils {
 
-    public static HashMap<String, Double> activeBounties = new HashMap<String, Double>();
+    public static HashMap<UUID, Double> activeBounties = new HashMap<>();
 
-    public static HashMap<String, Double> getBounties() {
+    public static HashMap<UUID, Double> getBounties() {
         return activeBounties;
     }
 
-    public static Double getBounty(String player) {
+    public static Double getBounty(UUID player) {
         return activeBounties.get(player);
     }
 
-    public static void setBounty(String player, Double amount) {
+    public static void setBounty(UUID player, Double amount) {
         activeBounties.put(player, amount);
     }
 
-    public static void removeActiveBounty(String player) {
+    public static void removeActiveBounty(UUID player) {
         activeBounties.remove(player);
     }
 
-
-    public static void updateActiveBounty(String player, Double amount) {
+    // Update amount on an active bounty
+    public static void updateActiveBounty(UUID player, Double amount) {
         activeBounties.replace(player, activeBounties.get(player), amount + activeBounties.get(player));
     }
 
@@ -45,7 +45,9 @@ public class Utils {
     public static ItemStack toHeadUuid(ItemStack item, UUID uuid) {
         SkullMeta skull = (SkullMeta) item.getItemMeta();
         ItemMeta itemMeta = item.getItemMeta();
+        assert skull != null;
         skull.setOwningPlayer(Bukkit.getOfflinePlayer(uuid));
+        assert itemMeta != null;
         if (itemMeta.hasDisplayName()) skull.setDisplayName(itemMeta.getDisplayName());
         if (itemMeta.hasLore()) skull.setLore(itemMeta.getLore());
         item.setItemMeta(skull);
@@ -57,6 +59,7 @@ public class Utils {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
         ItemStack playerHead = toHeadUuid(head, playerUUID);
         ItemMeta playerHeadLabel = playerHead.getItemMeta();
+        assert playerHeadLabel != null;
         playerHeadLabel.setDisplayName(ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Completed Bounty: " + ChatColor.GRAY + "" + ChatColor.BOLD + player);
         List<String> Lore = new ArrayList<>();
         Lore.add(ChatColor.GREEN + "Killer: " + ChatColor.GRAY + killer);
@@ -64,7 +67,7 @@ public class Utils {
         Lore.add("");
         Lore.add(ChatColor.GRAY + "Click to redeem this bounty.");
         playerHeadLabel.setLore(Lore);
-        playerHeadLabel.addEnchant(Enchantment.IMPALING, 1, true);
+        playerHeadLabel.addEnchant(Enchantment.QUICK_CHARGE, 1, true);
         playerHeadLabel.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         NamespacedKey key = new NamespacedKey(Bounties.getInstance(), "Bounties-Key");
         playerHeadLabel.getPersistentDataContainer().set(key, PersistentDataType.DOUBLE, amount);

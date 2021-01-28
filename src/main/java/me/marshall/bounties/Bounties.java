@@ -5,6 +5,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Objects;
+import java.util.UUID;
+
 public final class Bounties extends JavaPlugin {
 
     public static Bounties plugin;
@@ -20,17 +23,15 @@ public final class Bounties extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        saveDefaultConfig();
         plugin = this;
         Bukkit.getPluginManager().registerEvents(new PlayerEventHandler(), this);
-        getCommand("bounty").setExecutor(new BountyCommands());
+        Objects.requireNonNull(getCommand("bounty")).setExecutor(new BountyCommands());
         if (!setupEconomy()) {
             System.out.println("No economy plugin found. Disabling Vault.");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-
-        saveDefaultConfig();
-
         loadBounties();
 
     }
@@ -44,7 +45,7 @@ public final class Bounties extends JavaPlugin {
             return false;
         }
         econ = rsp.getProvider();
-        return econ != null;
+        return true;
     }
 
     @Override
@@ -56,14 +57,14 @@ public final class Bounties extends JavaPlugin {
 
     public void loadBounties() {
 
-        for (String keys : this.getConfig().getConfigurationSection("bounties").getKeys(false)) {
-            Utils.activeBounties.put(keys, (Double) this.getConfig().get("bounties." + keys));
+        for (String keys : Objects.requireNonNull(this.getConfig().getConfigurationSection("bounties")).getKeys(false)) {
+            Utils.activeBounties.put(UUID.fromString(keys), (Double) this.getConfig().get("bounties." + keys));
         }
     }
 
 
     public void saveBounties() {
-        for (String player : Utils.getBounties().keySet()) {
+        for (UUID player : Utils.getBounties().keySet()) {
             this.getConfig().set("bounties." + player, Utils.activeBounties.get(player));
         }
         saveConfig();

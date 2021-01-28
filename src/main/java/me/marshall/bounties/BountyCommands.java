@@ -8,6 +8,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.UUID;
+
 public class BountyCommands implements CommandExecutor {
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -25,29 +27,29 @@ public class BountyCommands implements CommandExecutor {
                     }
                 } else {
                     Player target = Bukkit.getPlayer(args[1]);
+                    assert target != null;
                     if (!target.isOnline()) {
                         sender.sendMessage("§7[§2t§fBounties§7] §cThe player " + target + " is not online.");
                     }
-                    if (target != null) {
-                        String targetString = target.getPlayerListName();
-                        double amount = Double.parseDouble(args[2]);
-                        Player player = (Player) sender;
-                        if (economy.getBalance(player) < amount) {
-                            sender.sendMessage("§7[§2t§fBounties§7] §cYou do not have $" + amount + ".");
-                        } else if (Utils.getBounties().containsKey(targetString)) {
-                            economy.withdrawPlayer(player, amount);
-                            String message = "&7[&2t&fBounties&7] &2" + player.getDisplayName() + " &fhas added &2$" + amount
-                                    + " &fto the bounty of &2" + targetString + "! &fThe new bounty total is now: &2$" + (Utils.getBounty(targetString) + amount);
-                            Utils.updateActiveBounty(targetString, amount);
-                            Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', message));
+                    UUID targetUUID = target.getUniqueId();
+                    String targetString = target.getPlayerListName();
+                    double amount = Double.parseDouble(args[2]);
+                    Player player = (Player) sender;
+                    if (economy.getBalance(player) < amount) {
+                        sender.sendMessage("§7[§2t§fBounties§7] §cYou do not have $" + amount + ".");
+                    } else if (Utils.getBounties().containsKey(targetUUID)) {
+                        economy.withdrawPlayer(player, amount);
+                        String message = "&7[&2t&fBounties&7] &2" + player.getDisplayName() + " &fhas added &2$" + amount
+                                + " &fto the bounty of &2" + targetString + "! &fThe new bounty total is now: &2$" + (Utils.getBounty(targetUUID) + amount);
+                        Utils.updateActiveBounty(targetUUID, amount);
+                        Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', message));
 
-                        } else {
-                            economy.withdrawPlayer(player, amount);
-                            Utils.setBounty(targetString, amount);
-                            String message = "&7[&2t&fBounties&7] &2" + player.getDisplayName() + " &fhas place a &2$" + amount
-                                    + " &fbounty on &2" + targetString + "!";
-                            Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', message));
-                        }
+                    } else {
+                        economy.withdrawPlayer(player, amount);
+                        Utils.setBounty(targetUUID, amount);
+                        String message = "&7[&2t&fBounties&7] &2" + player.getDisplayName() + " &fhas place a &2$" + amount
+                                + " &fbounty on &2" + targetString + "!";
+                        Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', message));
                     }
                 }
             }
@@ -64,18 +66,18 @@ public class BountyCommands implements CommandExecutor {
                     }
                 } else {
                     Player target = Bukkit.getPlayer(args[1]);
+                    assert target != null;
                     if (!target.isOnline()) {
                         sender.sendMessage("§7[§2t§fBounties§7] §cThe player " + target + " is not online.");
                     }
-                    if (target != null) {
-                        String targetString = target.getPlayerListName();
-                        Player player = (Player) sender;
-                        if (Utils.activeBounties.containsKey(targetString)) {
-                            Utils.removeActiveBounty(targetString);
-                            Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&7[&2t&fBounties&7] &fThe bounty on &2" + targetString + " &fhas been removed by Staff."));
-                        } else {
-                            sender.sendMessage("§7[§2t§fBounties§7] §cPlease enter a player with an active bounty.");
-                        }
+                    String targetString = target.getPlayerListName();
+                    UUID targetUUID = target.getUniqueId();
+                    Player player = (Player) sender;
+                    if (Utils.activeBounties.containsKey(targetUUID)) {
+                        Utils.removeActiveBounty(targetUUID);
+                        Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&7[&2t&fBounties&7] &fThe bounty on &2" + targetString + " &fhas been removed by Staff."));
+                    } else {
+                        sender.sendMessage("§7[§2t§fBounties§7] §cPlease enter a player with an active bounty.");
                     }
                 }
             }
