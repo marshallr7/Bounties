@@ -15,10 +15,15 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.Objects;
 import java.util.UUID;
 
 public class PlayerEventHandler implements Listener {
+
+    private final Bounties plugin;
+
+    public PlayerEventHandler(Bounties plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler
     public void onBountyDeath(PlayerDeathEvent event) {
@@ -32,7 +37,7 @@ public class PlayerEventHandler implements Listener {
         }
         Location location = entity.getLocation();
         World world = entity.getWorld();
-        if (world.getName().equals("pvp") || world.getName().equals("events")) {
+        if (world.getName().equals("pvparena") || world.getName().equals("event")) {
             return;
         }
         Player target = (Player) entity;
@@ -40,9 +45,13 @@ public class PlayerEventHandler implements Listener {
         String targetString = target.getPlayerListName();
         UUID targetUUID = target.getUniqueId();
         if (Utils.activeBounties.containsKey(targetUUID)) {
-            world.dropItemNaturally(location, Utils.deadPlayerSkull(target.getUniqueId(), targetString, attacker.getPlayerListName(), Utils.activeBounties.get(targetUUID)));
-            Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&7[&2t&fBounties&7] &2" + attacker.getPlayerListName() + " &fhas completed the &2$" + Utils.activeBounties.get(targetUUID) + " &fbounty on &2" + targetString));
-            Utils.removeActiveBounty(targetUUID);
+            if (plugin.getConfig().contains("bounties." + targetUUID)) {
+                world.dropItemNaturally(location, Utils.deadPlayerSkull(target.getUniqueId(), targetString, attacker.getPlayerListName(), Utils.activeBounties.get(targetUUID)));
+                Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', "&7[&2t&fBounties&7] &2" + attacker.getPlayerListName() + " &fhas completed the &2$" + Utils.activeBounties.get(targetUUID) + " &fbounty on &2" + targetString));
+                Utils.removeActiveBounty(targetUUID);
+                plugin.getConfig().set("bounties." + targetUUID, null);
+                plugin.saveConfig();
+            }
         }
 
     }
@@ -51,11 +60,11 @@ public class PlayerEventHandler implements Listener {
     public void onBountyRedeem(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         ItemStack item = player.getInventory().getItemInMainHand();
-        ItemStack air = new ItemStack(Material.AIR);
         if (event.getHand() == EquipmentSlot.OFF_HAND) {
             return;
         }
-        if (item.getType() == Material.AIR || !item.hasItemMeta() || !Objects.requireNonNull(item.getItemMeta()).hasDisplayName()) {
+
+        if (item == null || item.getType() == Material.AIR || !item.hasItemMeta() || !item.getItemMeta().hasDisplayName()) {
             return;
         }
         if (!(item.getItemMeta().getDisplayName().contains(ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Completed Bounty:"))) {

@@ -36,7 +36,6 @@ public class Utils {
         activeBounties.remove(player);
     }
 
-    // Update amount on an active bounty
     public static void updateActiveBounty(UUID player, Double amount) {
         activeBounties.replace(player, activeBounties.get(player), amount + activeBounties.get(player));
     }
@@ -45,9 +44,7 @@ public class Utils {
     public static ItemStack toHeadUuid(ItemStack item, UUID uuid) {
         SkullMeta skull = (SkullMeta) item.getItemMeta();
         ItemMeta itemMeta = item.getItemMeta();
-        assert skull != null;
         skull.setOwningPlayer(Bukkit.getOfflinePlayer(uuid));
-        assert itemMeta != null;
         if (itemMeta.hasDisplayName()) skull.setDisplayName(itemMeta.getDisplayName());
         if (itemMeta.hasLore()) skull.setLore(itemMeta.getLore());
         item.setItemMeta(skull);
@@ -59,7 +56,6 @@ public class Utils {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
         ItemStack playerHead = toHeadUuid(head, playerUUID);
         ItemMeta playerHeadLabel = playerHead.getItemMeta();
-        assert playerHeadLabel != null;
         playerHeadLabel.setDisplayName(ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Completed Bounty: " + ChatColor.GRAY + "" + ChatColor.BOLD + player);
         List<String> Lore = new ArrayList<>();
         Lore.add(ChatColor.GREEN + "Killer: " + ChatColor.GRAY + killer);

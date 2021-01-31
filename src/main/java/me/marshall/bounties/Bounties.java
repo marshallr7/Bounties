@@ -25,14 +25,16 @@ public final class Bounties extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
         plugin = this;
-        Bukkit.getPluginManager().registerEvents(new PlayerEventHandler(), this);
-        Objects.requireNonNull(getCommand("bounty")).setExecutor(new BountyCommands());
+        Bukkit.getPluginManager().registerEvents(new PlayerEventHandler(this), this);
+        Objects.requireNonNull(getCommand("bounty")).setExecutor(new BountyCommands(this));
         if (!setupEconomy()) {
             System.out.println("No economy plugin found. Disabling Vault.");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
         loadBounties();
+
+        new Placeholder().register();
 
     }
 
@@ -50,14 +52,13 @@ public final class Bounties extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        saveBounties();
-
+//        saveBounties();
     }
 
 
     public void loadBounties() {
 
-        for (String keys : Objects.requireNonNull(this.getConfig().getConfigurationSection("bounties")).getKeys(false)) {
+        for (String keys : this.getConfig().getConfigurationSection("bounties").getKeys(false)) {
             Utils.activeBounties.put(UUID.fromString(keys), (Double) this.getConfig().get("bounties." + keys));
         }
     }
@@ -68,5 +69,6 @@ public final class Bounties extends JavaPlugin {
             this.getConfig().set("bounties." + player, Utils.activeBounties.get(player));
         }
         saveConfig();
+        Bukkit.getConsoleSender().sendMessage("Bounties successfully saved");
     }
 }
